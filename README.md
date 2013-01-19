@@ -1,6 +1,6 @@
 webglchip8
 ==========
-Still things todo!
+Still things todo, like the MUST HAVE beep sound.
 
 Camera controls
 ---------------
