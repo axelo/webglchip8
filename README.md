@@ -8,7 +8,7 @@ Use mousedrags to move camera, mousewheel to zoom, alt + mousedrag for panning a
 
 Game controls
 -------------
-Each game has different keyboard mappings and are mapped to a more inituative keys, so try arrow keys/wsda space/enter.
+Each game has different keyboard mappings and are mapped to more inituative keys, so try arrow keys/wsda space/enter.
 
 Good Luck!
 
