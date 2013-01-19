@@ -18,20 +18,12 @@ function Renderer3d(canvas) {
 
   var pitch = 0;
   var yaw = 0;
+  var roll = 0;
   var zoom = 0;
 
   var panLeft = 0;
   var panTop = 0;
 
-  /*setInterval(function() {
-    yaw += 1;
-    pitch += 1;
-  }, 16);*/
-  
-//canvas.onmousedown = handleMouseDown;
- //   document.onmouseup = handleMouseUp;
-  //  document.onmousemove = handleMouseMove;
-  
   this.pan = function(left, top) {
     panLeft = left;
     panTop = top;
@@ -43,6 +35,10 @@ function Renderer3d(canvas) {
 
   this.yaw = function(y) {
     yaw = y;
+  }
+
+  this.roll = function(r) {
+    roll = r;
   }
 
   this.zoom = function(z) {
@@ -74,6 +70,7 @@ function Renderer3d(canvas) {
 
     mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]); // pitch
     mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]); // yaw
+    mat4.rotate(mvMatrix, degToRad(-roll), [0, 0, 1]); // roll
 
     // draw cube
     mat4.translate(mvMatrix, [-2*32+1, 32-1, 0]);

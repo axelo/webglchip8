@@ -9,37 +9,43 @@ function Keyboard() {
   // E ned (R)
 
   var mappings = {
-    0x0 : 65,
-    0x1 : 83, // Down, left player
-    0x2 : 68,
-    0x3 : 70,
-    0x4 : 87, // Up, left player
-    0x5 : 90,
-    0x6 : 88,
-    0x7 : 67,
-    0x8 : 86,
-    0x9 : 66,
-    0xa : 81,
-    0xb : 79,
-    0xc : 40, // Down, right player
-    0xd : 38, // Up, right player
-    0xe : 84,
-    0xf : 49
+    0x0 : 192,
+    0x1 : 49,
+    0x2 : 50,
+    0x3 : 51,
+    0x4 : 81,
+    0x5 : 87,
+    0x6 : 69,
+    0x7 : 65,
+    0x8 : 82,
+    0x9 : 68,
+    0xa : 90,
+    0xb : 88,
+    0xc : 67,
+    0xd : 86,
+    0xe : 70,
+    0xf : 9
   };
 
-  this.isKeyDown = function(index) {
+  this.isKeyDown = function(keyCode) {
+    return keys[keyCode] === true;
+  }
+
+  this.isHexKeyDown = function(index) {
+    //console.log("isHexKeyDown", index);
     return keys[mappings[index]] === true;
   }
 
-  this.isAnyKeyPressed = function() {
+  this.getHexKeyPressed = function() {
     for (var i = 0; i < 16; ++i) {
-      if (this.isKeyDown(i)) return true;
+      if (this.isHexKeyDown(i)) return i;
     }
-    return false;
+    return -1;
   }
 
   this.setMappings = function(map) {
     mappings = map;
+    //console.log("mappings", mappings);
   }
 
   function init() {

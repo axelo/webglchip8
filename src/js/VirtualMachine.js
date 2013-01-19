@@ -2,6 +2,9 @@ function VirtualMachine(font, video, keyboard) {
   
   var isRomLoaded;
 
+  var delayTimer;
+  var delayTimerPrecision;
+
   this.reset = function() {
     this.mem = new Uint8Array(4*1024); // 0x1000
     this.v = new Uint8Array(16);
@@ -9,7 +12,9 @@ function VirtualMachine(font, video, keyboard) {
     this.pc = 0x200;
     this.stack = new Uint16Array(16);
     this.sp = 0;
-    this.dt = 0;
+
+    delayTimer = delayTimerPrecision = 0;
+
     this.st = 0;
     this.video = video;
     this.keyboard = keyboard;
@@ -34,8 +39,19 @@ function VirtualMachine(font, video, keyboard) {
     var opcode = (this.mem[this.pc++] << 8) + this.mem[this.pc++];
 
     // console.log(padWord(this.pc-2) + " : " + opcodeToString(opcode));
-
     return opcode;
+  }
+
+  this.delayTimer = function(val) {
+    if (val !== undefined) delayTimer = delayTimerPrecision = val;
+    return delayTimer;
+  }
+
+  this.updateDelayTimer = function(elapsed) {
+    delayTimerPrecision -= (60 * elapsed) / 1000.0;
+    if (delayTimerPrecision < 0) delayTimerPrecision = 0;
+
+    delayTimer = Math.ceil(delayTimerPrecision) & 0xff;
   }
 
   function opcodeToString(opcode) {

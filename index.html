@@ -10,20 +10,13 @@
       }
 
       body {
-        background-color: gray;
-        text-align: center;
+        background-color: black;
       }
 
       #canvas2d, #canvas3d {
         background-color: black;
         position: absolute;
         top: 0; left: 0;
-      }
-
-      #editor {
-        margin-top: 20px;
-        width: 400px;
-        height: 300px;
       }
 
     </style>
@@ -61,6 +54,8 @@
       var lastTime = 0;
       var opcodesPerSecond = parseInt(getParameterByName("opcodesPerSecond"));
 
+
+
       function init() {
         initRenders();
 
@@ -76,9 +71,14 @@
               vm.keyboard.setMappings(romMeta.keyboardMapping);
               if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
             }
+            else {
+              if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
+            }
 
             vm.reset();
             vm.load(rom);
+
+            console.log(opcodesPerSecond);
 
             tick();
           },
@@ -96,7 +96,6 @@
         renderer3d.scale(20);
 
         mouseCam = new MouseCamareControl(document.getElementById("canvas3d"));
-
         
         window.onresize = function(e) {
           renderer3d.scale(20);
@@ -105,28 +104,43 @@
 
       var nextFetchAndExecute = 0;
 
+      var consumeKeys = [];
+
+      function onKeyDownOnce(keyCode, what) {
+        if (vm.keyboard.isKeyDown(keyCode)) {
+          if (!consumeKeys[keyCode]) {
+            what();
+            consumeKeys[keyCode] = true;
+          }
+        } else consumeKeys[keyCode] = false;
+      }
+
       function tick() {
         webkitRequestAnimationFrame(tick);
   
         var timeNow = new Date().getTime();
 
+        onKeyDownOnce(27, function() {
+          vm.halted = !vm.halted;
+        });
+
         if (lastTime !== 0) {
           var elapsed = timeNow - lastTime; // in ms
 
           if (!vm.halted) {
+            vm.updateDelayTimer(elapsed);
+
             nextFetchAndExecute += opcodesPerSecond * elapsed / 1000.0; // 400 opcodes/s
 
             while (nextFetchAndExecute >= 1) {
               interpreter.interpret(vm.fetch());
               nextFetchAndExecute -= 1;
             }
-
-            //vm.dt -= (60 * elapsed) / 1000.0;
-            //if (vm.dt < 0) vm.dt = 0;
           }
 
           renderer3d.pitch(mouseCam.pitch());
           renderer3d.yaw(mouseCam.yaw());
+          renderer3d.roll(mouseCam.roll());
           renderer3d.zoom(mouseCam.zoom());
           renderer3d.pan(mouseCam.panLeft(), mouseCam.panTop());
 

@@ -2,13 +2,14 @@ function MouseCamareControl(canvas) {
 
   var yaw = 0;
   var pitch = 0;
+  var roll = 0;
   var zoom = 0;
   var panLeft = 0;
   var panTop = 0;
 
   var isMouseDown = false;
-  var isLeftButton = false;
-  var isRightButton = false;
+  var isAltKeyDown = false;
+  var isShiftKeyDown = false;
 
   this.pitch = function() {
     return pitch;
@@ -16,6 +17,10 @@ function MouseCamareControl(canvas) {
 
   this.yaw = function() {
     return yaw;
+  }
+
+  this.roll = function() {
+    return roll;
   }
 
   this.zoom = function() {
@@ -32,8 +37,8 @@ function MouseCamareControl(canvas) {
 
   function onMouseDown(e) {
     isMouseDown = true;
-    isLeftButton = e.altKey === false;
-    isRightButton = e.altKey === true;
+    isAltKeyDown = e.altKey;
+    isShiftKeyDown = e.shiftKey;
   }
 
   function onMouseUp(e) {
@@ -42,14 +47,16 @@ function MouseCamareControl(canvas) {
 
   function onMouseMove(e) {
     if (isMouseDown) {
-      if (isLeftButton) {
-        yaw -= (e.webkitMovementX / 2.0);
-        pitch -= (e.webkitMovementY / 2.0);
-      }
-
-      if (isRightButton) {
+      if (isAltKeyDown) {
         panLeft -= (e.webkitMovementX / 2.0);
         panTop -= (e.webkitMovementY / 2.0);
+      }
+      else if (isShiftKeyDown) {
+        roll -= (e.webkitMovementX / 2.0);
+      }
+      else {
+        yaw -= (e.webkitMovementX / 2.0);
+        pitch -= (e.webkitMovementY / 2.0);
       }
     }
   }

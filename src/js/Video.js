@@ -8,6 +8,11 @@ function Video() {
 
   // Returns 1 on 'collision', a bit got erased (1 -> 0), 0 otherwise
   this.putSprite = function(x, y, height, spriteMem, offset) {
+
+    //console.log("x: " + (x % 64) + " y: " + y + " height: " + height);
+    x %= 64;
+    y %= 32;
+
     var endOffset = offset + height;
     var collisionFlag = 0;
 

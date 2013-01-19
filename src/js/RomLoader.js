@@ -28,8 +28,10 @@ function RomLoader() {
   this.loadMeta = function(romName) {
     var xhr = new XMLHttpRequest();
 
-    xhr.open("GET", "chip8roms/" + romName + ".json", false); // TODO: async
 
+    xhr.open("GET", "chip8roms/" + romName + ".json", false); // TODO: async
+    xhr.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2005 00:00:00 GMT");
+    
     xhr.onerror = function(e) {
       console.log("Rom meta error", romName);
     }

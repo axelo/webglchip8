@@ -46,6 +46,12 @@ function Interpreter(vm) {
         if (vm.v[i] !== val) vm.pc += 2;
         break;
 
+      case 0x5:
+        var desti = (opcode >>> 8) & 0xf;
+        var srci = (opcode >>> 4) & 0xf;
+        if (vm.v[desti] === vm.v[srci]) vm.pc += 2;
+        break;
+
       case 0x6:
         var i = (opcode >>> 8) & 0xf;
         var val = opcode & 0xff;
@@ -97,6 +103,12 @@ function Interpreter(vm) {
             vm.v[0xf] = carry;
             break;
 
+          case 0x7:
+            var res = vm.v[srci] - vm.v[desti];
+            vm.v[desti] = res & 0xff;
+            vm.v[0xf] = ~(res >>> 8) & 0x1;
+            break;
+
           case 0xe:
             var carry = (vm.v[desti] >>> 7) & 1;
             vm.v[desti] <<= 1;
@@ -138,12 +150,12 @@ function Interpreter(vm) {
         switch (opcode & 0xff) {
           case 0x9e:
             var i = (opcode >>> 8) & 0xf;
-            if (vm.keyboard.isKeyDown(vm.v[i])) vm.pc += 2;
+            if (vm.keyboard.isHexKeyDown(vm.v[i])) vm.pc += 2;
             break;
 
           case 0xa1:
             var i = (opcode >>> 8) & 0xf;
-            if (!vm.keyboard.isKeyDown(vm.v[i])) vm.pc += 2;
+            if (!vm.keyboard.isHexKeyDown(vm.v[i])) vm.pc += 2;
             break;
 
           default:
@@ -155,16 +167,19 @@ function Interpreter(vm) {
         switch (opcode & 0xff) {
           case 0x07:
             var i = (opcode >>> 8) & 0xf;
-            vm.v[i] = vm.dt;
+            vm.v[i] = vm.delayTimer();
             break;
 
           case 0x0a:
-            if (!vm.keyboard.isAnyKeyPressed()) vm.pc -= 2; // Try again until any key is pressed
+            var keypressedi = vm.keyboard.getHexKeyPressed();
+            if (keypressedi === -1) vm.pc -= 2; // Try again until any key is pressed
+            var i = (opcode >>> 8) & 0xf;
+            vm.v[i] = keypressedi;
             break;
 
           case 0x15:
             var i = (opcode >>> 8) & 0xf;
-            vm.dt = 0; // vm.v[i]; TODO delay
+            vm.delayTimer(vm.v[i]);
             break;
 
           case 0x18:
