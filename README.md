@@ -10,7 +10,7 @@ Game controls
 -------------
 Each game has different keyboard mappings and are mapped to more inituative keys, so try arrow keys/wsda space/enter.
 
-ESC pause the emulation, but you can till have fun with the camera,
+ESC pauses the emulation, but you can till have fun with the camera,
 
 Good Luck!
 
