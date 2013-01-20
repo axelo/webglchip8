@@ -24,7 +24,7 @@ function Keyboard() {
     0xc : 67,
     0xd : 86,
     0xe : 70,
-    0xf : 9
+    0xf : 16
   };
 
   this.isKeyDown = function(keyCode) {
@@ -37,6 +37,7 @@ function Keyboard() {
   }
 
   this.getHexKeyPressed = function() {
+    //console.log("getHexKeyPressed");
     for (var i = 0; i < 16; ++i) {
       if (this.isHexKeyDown(i)) return i;
     }

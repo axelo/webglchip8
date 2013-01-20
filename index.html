@@ -60,31 +60,33 @@
       function init() {
         initRenders();
 
-        loadFont(function(font) {
-          vm = new VirtualMachine(font, new Sound(), new Video(), new Keyboard());
-          
-          interpreter = new Interpreter(vm);
+        loadFont("chip8.font", function(chip8font) {
+          loadFont("schip8.font", function(schip8font) {
+            vm = new VirtualMachine(chip8font, schip8font, new Sound(), new Video(), new Keyboard());
+            
+            interpreter = new Interpreter(vm);
 
-          romLoader.load(romName, function(rom) {
-            var romMeta = romLoader.loadMeta(romName);
+            romLoader.load(romName, function(rom) {
+              var romMeta = romLoader.loadMeta(romName);
 
-            if (romMeta !== undefined) {
-              vm.keyboard.setMappings(romMeta.keyboardMapping);
-              if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
-            }
-            else {
-              if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
-            }
+              if (romMeta !== undefined) {
+                vm.keyboard.setMappings(romMeta.keyboardMapping);
+                if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
+              }
+              else {
+                if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
+              }
 
-            vm.reset();
-            vm.load(rom);
+              vm.reset();
+              vm.load(rom);
 
-            console.log(opcodesPerSecond);
+              console.log(opcodesPerSecond);
 
-            tick();
-          },
-          function() {
-            alert("Couldn't load rom '" + romName + "'");
+              tick();
+            },
+            function() {
+              alert("Couldn't load rom '" + romName + "'");
+            });
           });
         });
       }
@@ -155,8 +157,8 @@
           renderer3d.zoom(mouseCam.zoom());
           renderer3d.pan(mouseCam.panLeft(), mouseCam.panTop());
 
-          renderer3d.render(vm.video.memory());
-          renderer2d.render(vm.video.memory());
+          renderer3d.render(vm.video);
+          renderer2d.render(vm.video);
 
           /*if (vm.keyboard.isKeyDown(32)) {
             if (!vm.sound.isPlaying()) {
@@ -186,10 +188,10 @@
           return decodeURIComponent(results[1].replace(/\+/g, " "));
       }
 
-      function loadFont(cb) {
+      function loadFont(font, cb) {
         var xhr = new XMLHttpRequest();
 
-        xhr.open("GET", "font/chip8.font", true); // TODO: async
+        xhr.open("GET", "font/" + font, true);
         xhr.responseType = "arraybuffer";
 
         xhr.onerror = function(e) {

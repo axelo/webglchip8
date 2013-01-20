@@ -26,7 +26,7 @@ function Sound() {
 
   this.stop = function() {
     if (isPlaying) {
-      console.log("stopping sound.");
+      //console.log("stopping sound.");
       oscillator.disconnect();
       isPlaying = false;
     }

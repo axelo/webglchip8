@@ -1,21 +1,54 @@
 function Interpreter(vm) {
   
+  var lastOpcode;
+
   this.interpret = function(opcode) {
 
     var highByte = opcode >>> 12;
 
     switch (highByte) {
       case 0x0:
-        if (opcode >>> 8 !== 0) halt(opcode); // 1802 machine code program, this is just a virtual machine
+        if (opcode >>> 8 !== 0) halt(opcode); // 1802 machine code program, this is just a virtual machine, TODO handle as "detect-exit"
 
-        switch (opcode & 0xff) {
-          case 0xe0:
-            vm.video.clear();
+        switch (opcode & 0xf0) {
+          case 0xc0:
+            vm.video.scrollDown(opcode & 0xf);
             break;
 
-          case 0xee:
-            if (vm.pc < 0) throw "Stack pointer underflow.";
-            vm.pc = vm.stack[--vm.sp];
+          case 0xe0:
+            switch (opcode & 0xf) {
+              case 0x0:
+                vm.video.clear();
+                break;
+
+              case 0xe:
+                if (vm.pc < 0) throw "Stack pointer underflow.";
+                vm.pc = vm.stack[--vm.sp];
+                break;
+
+              default: 
+                halt(opcode);
+            }
+            break;
+
+          case 0xf0:
+            switch (opcode & 0xf) {
+              case 0xc:
+                vm.video.scrollLeft();
+                break;
+
+              case 0xd:
+                vm.halted = true;
+                // TODO exit flag, merge with "detect exit"-idea
+                break;
+
+              case 0xf:
+                vm.video.setSupeChipMode();
+                break;
+
+              default:
+                halt(opcode);
+            }
             break;
 
           default:
@@ -142,7 +175,6 @@ function Interpreter(vm) {
         var xi = (opcode >>> 8) & 0xf;
         var yi = (opcode >>> 4) & 0xf;
         var height = opcode & 0xf;
-        if (height === 0) console.log("height 0");
         vm.v[0xf] = vm.video.putSprite(vm.v[xi], vm.v[yi], height, vm.mem, vm.i);
         break;
 
@@ -194,7 +226,12 @@ function Interpreter(vm) {
 
           case 0x29: // Point mem reg (i) to font mem, val in reg decides fontchar
             var i = (opcode >>> 8) & 0xf;
-            vm.i = vm.v[i] * 5;
+            vm.i = vm.font8x5BaseAddress() + vm.v[i] * 5;
+            break;
+
+          case 0x30: // superchip font (16x16)
+            var i = (opcode >>> 8) & 0xf;
+            vm.i = vm.font8x10BaseAddress() + vm.v[i] * 10;
             break;
 
           case 0x33: // Binary Coded Decimal
@@ -215,6 +252,16 @@ function Interpreter(vm) {
             for (var i = 0; i <= endi; ++i) vm.v[i] = vm.mem[vm.i + i];
             break;
 
+          case 0x75:
+            var endi = Math.min((opcode >>> 8) & 0xf, 7);
+            for (var i = 0; i <= endi; ++i) vm.hp48flag[i] = vm.v[i];
+            break;
+
+          case 0x85:
+            var endi = Math.min((opcode >>> 8) & 0xf, 7);
+            for (var i = 0; i <= endi; ++i) vm.v[i] = vm.hp48flag[i];
+            break;
+
           default:
             halt(opcode);
         } 
@@ -224,11 +271,12 @@ function Interpreter(vm) {
         halt(opcode);
     }
 
+    lastOpcode = opcode;
   }
 
   function halt(opcode) {
     vm.halted = true;
-    throw padWord(vm.pc) + " : " + opcodeToString(opcode) + " could not interpret.";
+    throw padWord(vm.pc - 2) + " : " + opcodeToString(opcode) + " could not interpret. Last opcodes was: " + opcodeToString(lastOpcode);
   }
 
   function opcodeToString(opcode) {

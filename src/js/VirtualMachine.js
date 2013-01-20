@@ -1,4 +1,4 @@
-function VirtualMachine(font, sound, video, keyboard) {
+function VirtualMachine(font, superfont, sound, video, keyboard) {
   
   var isRomLoaded;
 
@@ -15,6 +15,7 @@ function VirtualMachine(font, sound, video, keyboard) {
     this.pc = 0x200;
     this.stack = new Uint16Array(16);
     this.sp = 0;
+    this.hp48flag = new Uint8Array(8);
 
     delayTimer = delayTimerPrecision = 0;
     soundTimer = soundTimerPrecision = 0;
@@ -30,8 +31,17 @@ function VirtualMachine(font, sound, video, keyboard) {
     isRomLoaded = false;
   }
 
+  this.font8x5BaseAddress = function() {
+    return 0x0;
+  }
+
+  this.font8x10BaseAddress = function() {
+    return 16 * 5;
+  }
+
   this.load = function(rom) {
-    this.mem.set(new Uint8Array(font));
+    this.mem.set(new Uint8Array(font), this.font8x5BaseAddress());
+    this.mem.set(new Uint8Array(superfont), this.font8x10BaseAddress());
     this.mem.set(new Uint8Array(rom), 0x200); //, 0, Math.min(rom.length, 0x1000 - 0x200)), 0x200);
     isRomLoaded = true;
   }
@@ -45,7 +55,7 @@ function VirtualMachine(font, sound, video, keyboard) {
 
     var opcode = (this.mem[this.pc++] << 8) + this.mem[this.pc++];
 
-    // console.log(padWord(this.pc-2) + " : " + opcodeToString(opcode));
+    //console.log(padWord(this.pc-2) + " : " + opcodeToString(opcode));
     return opcode;
   }
 
@@ -72,9 +82,9 @@ function VirtualMachine(font, sound, video, keyboard) {
   }
 
   this.updateSoundTimer = function(elapsed) {
-    soundTimerPrecision -= (60 * elapsed) / 1000.0;
+    if (soundTimerPrecision > 0) soundTimerPrecision -= (60 * elapsed) / 1000.0;
     
-    if (soundTimerPrecision < 0) {
+    if (soundTimerPrecision <= 0) {
       soundTimerPrecision = 0;
       sound.stop();
     }

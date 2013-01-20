@@ -55,7 +55,7 @@ function Renderer3d(canvas) {
     gl.viewportHeight = canvas.height;
   }
 
-  this.render = function(videoMem) {
+  this.render = function(video) {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -65,28 +65,39 @@ function Renderer3d(canvas) {
     mat4.identity(mvMatrix);
 
     //mvPushMatrix();
+    var videoMem = video.memory();
+    var offsetWidth = video.offsetWidth();
+    var screenWidth = video.screenWidth();
+    var screenHeight = video.screenHeight();
+    var chip8Scale = screenWidth === 128 ? 1 : 2;
+    var zoomDist = -zoom - 100;
 
-    mat4.translate(mvMatrix, [-panLeft, panTop, -zoom - 100]);
+    if (chip8Scale === 1) {
+      zoomDist *= 2;
+    }
+
+    mat4.translate(mvMatrix, [-panLeft, panTop, zoomDist]);
 
     mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]); // pitch
     mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]); // yaw
     mat4.rotate(mvMatrix, degToRad(-roll), [0, 0, 1]); // roll
 
-    // draw cube
-    mat4.translate(mvMatrix, [-2*32+1, 32-1, 0]);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cuberVertexPosBuffer);
+    /*gl.bindBuffer(gl.ARRAY_BUFFER, cuberVertexPosBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cuberVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0),
 
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);*/
+
     
-    for (var y = 0; y < 32; ++y) {
-      for (var x = 0; x < 64; ++x) {
+    // draw cube
+    mat4.translate(mvMatrix, [-2 * (screenWidth / 2) + 1, screenHeight-1, 0]);
+
+    for (var y = 0; y < screenHeight; ++y) {
+      for (var x = 0; x < screenWidth; ++x) {
         
-        if (videoMem[y * 64 + x] === 1) {
+        if (videoMem[y * offsetWidth + x] === 1) {
           setMatrixUniforms();
           gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
         }
@@ -94,10 +105,20 @@ function Renderer3d(canvas) {
         mat4.translate(mvMatrix, [2, 0, 0]);
       }
 
-      mat4.translate(mvMatrix, [-64*2, -2, 0]);
+      mat4.translate(mvMatrix, [-screenWidth * 2, -2, 0]);
     }
 
     //mvPopMatrix();
+  }
+
+  function bindBuffers() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, cuberVertexPosBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cuberVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0),
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
   }
 
   function degToRad(degrees) {
@@ -122,6 +143,7 @@ function Renderer3d(canvas) {
   function init() {
     initGl();
     initBuffers();
+    bindBuffers();
   }
 
   function initGl() {
