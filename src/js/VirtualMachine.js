@@ -1,9 +1,12 @@
-function VirtualMachine(font, video, keyboard) {
+function VirtualMachine(font, sound, video, keyboard) {
   
   var isRomLoaded;
 
   var delayTimer;
   var delayTimerPrecision;
+
+  var soundTimer;
+  var soundTimerPrecision;
 
   this.reset = function() {
     this.mem = new Uint8Array(4*1024); // 0x1000
@@ -14,10 +17,14 @@ function VirtualMachine(font, video, keyboard) {
     this.sp = 0;
 
     delayTimer = delayTimerPrecision = 0;
+    soundTimer = soundTimerPrecision = 0;
 
-    this.st = 0;
     this.video = video;
     this.keyboard = keyboard;
+    this.sound = sound;
+
+    sound.stop();
+
     this.halted = false;
 
     isRomLoaded = false;
@@ -25,7 +32,7 @@ function VirtualMachine(font, video, keyboard) {
 
   this.load = function(rom) {
     this.mem.set(new Uint8Array(font));
-    this.mem.set(new Uint8Array(rom), 0x200);
+    this.mem.set(new Uint8Array(rom), 0x200); //, 0, Math.min(rom.length, 0x1000 - 0x200)), 0x200);
     isRomLoaded = true;
   }
 
@@ -52,6 +59,27 @@ function VirtualMachine(font, video, keyboard) {
     if (delayTimerPrecision < 0) delayTimerPrecision = 0;
 
     delayTimer = Math.ceil(delayTimerPrecision) & 0xff;
+  }
+
+  this.soundTimer = function(val) {
+    if (val !== undefined) {
+      soundTimer = soundTimerPrecision = val;
+
+      if (soundTimer > 0) sound.play();
+    }
+
+    return soundTimer;
+  }
+
+  this.updateSoundTimer = function(elapsed) {
+    soundTimerPrecision -= (60 * elapsed) / 1000.0;
+    
+    if (soundTimerPrecision < 0) {
+      soundTimerPrecision = 0;
+      sound.stop();
+    }
+
+    soundTimer = Math.ceil(soundTimerPrecision) & 0xff;
   }
 
   function opcodeToString(opcode) {

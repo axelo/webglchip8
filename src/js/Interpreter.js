@@ -184,7 +184,7 @@ function Interpreter(vm) {
 
           case 0x18:
             var i = (opcode >>> 8) & 0xf;
-            vm.st = vm.v[i];
+            vm.soundTimer(vm.v[i]);
             break;
 
           case 0x1e:

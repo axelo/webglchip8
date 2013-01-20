@@ -23,6 +23,7 @@
 
     <script type="text/javascript" src="src/js/Keyboard.js"></script>
     <script type="text/javascript" src="src/js/Video.js"></script>
+    <script type="text/javascript" src="src/js/Sound.js"></script>
     <script type="text/javascript" src="src/js/VirtualMachine.js"></script>
 
     <script type="text/javascript" src="src/js/Interpreter.js"></script>
@@ -60,7 +61,7 @@
         initRenders();
 
         loadFont(function(font) {
-          vm = new VirtualMachine(font, new Video(), new Keyboard());
+          vm = new VirtualMachine(font, new Sound(), new Video(), new Keyboard());
           
           interpreter = new Interpreter(vm);
 
@@ -120,8 +121,17 @@
   
         var timeNow = new Date().getTime();
 
-        onKeyDownOnce(27, function() {
+        onKeyDownOnce(27, function() {          
           vm.halted = !vm.halted;
+
+          if (vm.halted) {
+            vm.sound.forceMute();
+          }
+          else {
+            if (vm.sound.isForcedMute()) {
+              vm.sound.unmute();
+            }
+          }
         });
 
         if (lastTime !== 0) {
@@ -129,8 +139,9 @@
 
           if (!vm.halted) {
             vm.updateDelayTimer(elapsed);
+            vm.updateSoundTimer(elapsed);
 
-            nextFetchAndExecute += opcodesPerSecond * elapsed / 1000.0; // 400 opcodes/s
+            nextFetchAndExecute += opcodesPerSecond * elapsed / 1000.0; // opcodes/s
 
             while (nextFetchAndExecute >= 1) {
               interpreter.interpret(vm.fetch());
@@ -147,8 +158,13 @@
           renderer3d.render(vm.video.memory());
           renderer2d.render(vm.video.memory());
 
-          /*if (vm.keyboard.isKeyDown(0xc)) {
-            console.log(vm);
+          /*if (vm.keyboard.isKeyDown(32)) {
+            if (!vm.sound.isPlaying()) {
+              vm.sound.play();
+            }
+            else {
+              vm.sound.stop();
+            }
           }*/
         }
 
