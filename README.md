@@ -1,6 +1,6 @@
 webglchip8
 ==========
-Still things todo, like the supporting SCHIP8.
+Still things todo, like a nive coverflow for selecting game.
 
 Camera controls
 ---------------
@@ -16,6 +16,8 @@ Good Luck!
 
 Try it
 ------
+
+###Chip8 games
 [MAZE](http://axelo.github.com/webglchip8/index.html?rom=MAZE)
 
 [PONG2](http://axelo.github.com/webglchip8/index.html?rom=PONG2)
@@ -55,3 +57,18 @@ Try it
 [WALL](http://axelo.github.com/webglchip8/index.html?rom=WALL)
 
 [WIPEOFF](http://axelo.github.com/webglchip8/index.html?rom=WIPEOFF)
+
+###Super Chip games
+[ALIEN](http://axelo.github.com/webglchip8/index.html?rom=ALIEN)
+
+[ANT](http://axelo.github.com/webglchip8/index.html?rom=ANT)
+
+[CAR](http://axelo.github.com/webglchip8/index.html?rom=CAR)
+
+[JOUST23](http://axelo.github.com/webglchip8/index.html?rom=JOUST23)
+
+[MINES](http://axelo.github.com/webglchip8/index.html?rom=MINES)
+
+[SUPERBLINKY](http://axelo.github.com/webglchip8/index.html?rom=SUPERBLINKY)
+
+[SUPERMAZE](http://axelo.github.com/webglchip8/index.html?rom=SUPERMAZE)
