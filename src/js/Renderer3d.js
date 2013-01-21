@@ -20,6 +20,7 @@ function Renderer3d(canvas) {
   var yaw = 0;
   var roll = 0;
   var zoom = 0;
+  var scalez = 1;
 
   var panLeft = 0;
   var panTop = 0;
@@ -45,6 +46,11 @@ function Renderer3d(canvas) {
     zoom = z;
   }
 
+  this.scalez = function(s) {
+    scalez = s;
+  }
+
+  // TODO - rename
   this.scale = function(s) {
     scale = s;
 
@@ -81,6 +87,8 @@ function Renderer3d(canvas) {
     mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]); // pitch
     mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]); // yaw
     mat4.rotate(mvMatrix, degToRad(-roll), [0, 0, 1]); // roll
+
+    mat4.scale(mvMatrix, [1, 1, scalez]); // Scale by 200%
 
     /*gl.bindBuffer(gl.ARRAY_BUFFER, cuberVertexPosBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cuberVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0),

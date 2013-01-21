@@ -25,7 +25,6 @@
     <script type="text/javascript" src="src/js/Video.js"></script>
     <script type="text/javascript" src="src/js/Sound.js"></script>
     <script type="text/javascript" src="src/js/VirtualMachine.js"></script>
-
     <script type="text/javascript" src="src/js/Interpreter.js"></script>
     
     <script type="text/javascript" src="src/js/RomLoader.js"></script>
@@ -33,10 +32,14 @@
     <script type="text/javascript" src="src/js/MouseCamareControl.js"></script>
     <script type="text/javascript" src="src/js/ShadersLoader.js"></script>
     <script type="text/javascript" src="src/js/Renderer3d.js"></script>
-    <script type="text/javascript" src="lib/glMatrix-0.9.5.min.js"></script>
 
     <script type="text/javascript" src="src/js/Renderer2d.js"></script>
 
+    <script type="text/javascript" src="src/js/State.js"></script>
+    <script type="text/javascript" src="src/js/ArraySerializer.js"></script>
+
+    <script type="text/javascript" src="lib/glMatrix-0.9.5.min.js"></script>
+    
     <script type="text/javascript">
 
       var vm;
@@ -52,10 +55,10 @@
       var romName = getParameterByName("rom");
       var romLoader = new RomLoader();
 
+      var states;
+
       var lastTime = 0;
       var opcodesPerSecond = parseInt(getParameterByName("opcodesPerSecond"));
-
-
 
       function init() {
         initRenders();
@@ -64,6 +67,8 @@
           loadFont("schip8.font", function(schip8font) {
             vm = new VirtualMachine(chip8font, schip8font, new Sound(), new Video(), new Keyboard());
             
+            states = new State(vm);
+
             interpreter = new Interpreter(vm);
 
             romLoader.load(romName, function(rom) {
@@ -72,6 +77,8 @@
               if (romMeta !== undefined) {
                 vm.keyboard.setMappings(romMeta.keyboardMapping);
                 if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
+
+                if (romMeta.camera) mouseCam.setCamera(romMeta.camera);
               }
               else {
                 if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
@@ -118,12 +125,29 @@
         } else consumeKeys[keyCode] = false;
       }
 
+      function updateCamera() {
+        renderer3d.zoom(mouseCam.zoom());
+        renderer3d.pan(mouseCam.panLeft(), mouseCam.panTop());
+        renderer3d.pitch(mouseCam.pitch());
+        renderer3d.yaw(mouseCam.yaw());
+        renderer3d.roll(mouseCam.roll());
+        renderer3d.scalez(mouseCam.scalez());
+      }
+
       function tick() {
         webkitRequestAnimationFrame(tick);
   
         var timeNow = new Date().getTime();
 
-        onKeyDownOnce(27, function() {          
+        onKeyDownOnce(27, function() {
+
+          console.log("zoom", mouseCam.zoom());
+          console.log("pan", mouseCam.panLeft() + "," + mouseCam.panTop());
+          console.log("pitch", mouseCam.pitch());
+          console.log("yaw", mouseCam.yaw());
+          console.log("roll", mouseCam.roll());
+          console.log("scalez", mouseCam.scalez());
+
           vm.halted = !vm.halted;
 
           if (vm.halted) {
@@ -136,6 +160,14 @@
           }
         });
 
+        onKeyDownOnce(188, function() {
+          states.save();
+        });
+
+        onKeyDownOnce(190, function() {
+          states.load();
+        });
+
         if (lastTime !== 0) {
           var elapsed = timeNow - lastTime; // in ms
 
@@ -145,29 +177,16 @@
 
             nextFetchAndExecute += opcodesPerSecond * elapsed / 1000.0; // opcodes/s
 
-            while (nextFetchAndExecute >= 1) {
+            while (nextFetchAndExecute >= 1 && !vm.halted) {
               interpreter.interpret(vm.fetch());
               nextFetchAndExecute -= 1;
             }
           }
 
-          renderer3d.pitch(mouseCam.pitch());
-          renderer3d.yaw(mouseCam.yaw());
-          renderer3d.roll(mouseCam.roll());
-          renderer3d.zoom(mouseCam.zoom());
-          renderer3d.pan(mouseCam.panLeft(), mouseCam.panTop());
+          updateCamera();
 
           renderer3d.render(vm.video);
           renderer2d.render(vm.video);
-
-          /*if (vm.keyboard.isKeyDown(32)) {
-            if (!vm.sound.isPlaying()) {
-              vm.sound.play();
-            }
-            else {
-              vm.sound.stop();
-            }
-          }*/
         }
 
         lastTime = timeNow;

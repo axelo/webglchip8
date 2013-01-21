@@ -5,7 +5,7 @@ function VirtualMachine(font, superfont, sound, video, keyboard) {
   var delayTimer;
   var delayTimerPrecision;
 
-  var soundTimer;
+  var soundTimer; 
   var soundTimerPrecision;
 
   this.reset = function() {
@@ -63,6 +63,11 @@ function VirtualMachine(font, superfont, sound, video, keyboard) {
     if (val !== undefined) delayTimer = delayTimerPrecision = val;
     return delayTimer;
   }
+  
+  this.delayTimerPrecision = function(val) {
+    if (val !== undefined) delayTimerPrecision = val;
+    return delayTimerPrecision;
+  }
 
   this.updateDelayTimer = function(elapsed) {
     delayTimerPrecision -= (60 * elapsed) / 1000.0;
@@ -79,6 +84,11 @@ function VirtualMachine(font, superfont, sound, video, keyboard) {
     }
 
     return soundTimer;
+  }
+
+  this.soundTimerPrecision = function(val) {
+    if (val !== undefined) soundTimerPrecision = val;
+    return soundTimerPrecision;
   }
 
   this.updateSoundTimer = function(elapsed) {

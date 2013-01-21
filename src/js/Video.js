@@ -39,6 +39,11 @@ function Video() {
     memory = new Uint8Array(128 * 64);
   }
 
+  this.setChip8Mode = function() {
+    screenWidth = 64;
+    screenHeight = 32;
+  }
+
   this.setSupeChipMode = function() {
     screenWidth = 128;
     screenHeight = 64;
@@ -67,6 +72,10 @@ function Video() {
 
   this.isSuperChipMode = function() {
     return screenWidth === 128;
+  }
+
+  this.setMemory = function(mem) {
+    memory = mem;
   }
   
   function putSprite8x(x, y, height, spriteMem, offset) {

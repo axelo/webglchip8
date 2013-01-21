@@ -4,12 +4,23 @@ function MouseCamareControl(canvas) {
   var pitch = 0;
   var roll = 0;
   var zoom = 0;
+  var scalez = 1;
   var panLeft = 0;
   var panTop = 0;
 
   var isMouseDown = false;
   var isAltKeyDown = false;
   var isShiftKeyDown = false;
+
+  this.setCamera = function(cam) {
+    yaw = cam.yaw;
+    pitch = cam.pitch;
+    roll = cam.roll;
+    zoom = cam.zoom;
+    scalez = cam.scalez;
+    panLeft = cam.panLeft;
+    panTop = cam.panTop;
+  }
 
   this.pitch = function() {
     return pitch;
@@ -25,6 +36,10 @@ function MouseCamareControl(canvas) {
 
   this.zoom = function() {
     return zoom;
+  }
+
+  this.scalez = function() {
+    return scalez;
   }
 
   this.panLeft = function() {
@@ -62,10 +77,16 @@ function MouseCamareControl(canvas) {
   }
 
   function onMouseWheel(e) {
-    zoom -= (e.wheelDelta / 10.0);
+    if (e.shiftKey) {
+      scalez += (e.wheelDelta / 10.0);
+      if (scalez <= 0) scalez = 0.0;
+    }
+    else {
+      zoom -= (e.wheelDelta / 10.0);
 
-    zoom = Math.min(zoom, 1000.0 - 200.0);
-    zoom = Math.max(zoom, 3 - 100.0);
+      zoom = Math.min(zoom, 1000.0 - 200.0);
+      zoom = Math.max(zoom, 3 - 100.0);
+    }
   }
   
   function init() {
