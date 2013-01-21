@@ -4,13 +4,21 @@ Still things todo, like a nive coverflow for selecting game.
 
 Camera controls
 ---------------
-Use mousedrags to move camera, mousewheel to zoom, alt + mousedrag for panning and shift + mousedrag for roll
+* Mousedrags to move camera
+* Alt + mousedrags for panning
+* Shift + mousedrags for roll
+* Mousewheel to zoom
+* Shift + mousewheel for "depth" (z-axis scaling)
 
 Game controls
 -------------
 Each game has different keyboard mappings and are mapped to more inituative keys, so try arrow keys/wsda space/enter.
 
 ESC pauses the emulation, but you can till have fun with the camera,
+
+**experimantal** feature for quicksave/load game states
+* '.' for __save__
+* ',' for __load__
 
 Good Luck!
 
