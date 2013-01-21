@@ -46,7 +46,6 @@ function Video() {
 
   this.scrollDown =  function(lines) {
     //console.log("scrolling down " + lines + " lines.");
-    
     var copy = new Uint8Array(128 * 64);
 
     copy.set(memory.subarray(0, memory.length - 128), 128);
@@ -62,7 +61,7 @@ function Video() {
       var row = memory.subarray(y * 128 + 4,  y * 128 + 4 + 128 - 4);
       copy.set(row, y * 128);
     }
-    
+
     memory = copy;
   }
 
@@ -89,6 +88,8 @@ function Video() {
     for (; offset < endOffset && y < screenWidth; offset += 2) {
       collisionFlag |= xorWord(x, y++, (spriteMem[offset] << 8) + spriteMem[offset + 1]);
     }
+
+    return collisionFlag; // TODO: enable hacks which always returns false :)
   }
 
   function xorByte(x, y, b) {
