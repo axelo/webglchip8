@@ -2,6 +2,10 @@ webglchip8
 ==========
 Still things todo, like a nive coverflow for selecting game.
 
+Requirements
+------------
+Chrome with support for webgl
+
 Camera controls
 ---------------
 * Mousedrags to move camera
