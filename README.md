@@ -1,6 +1,5 @@
 webglchip8
 ==========
-Still things todo, like a nive coverflow for selecting game.
 
 Requirements
 ------------
