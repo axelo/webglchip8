@@ -1,7 +1,7 @@
 function Sound() {
   
   var context = new webkitAudioContext();
-  var gainNode = context.createGainNode();
+  var gainNode = context.createGain();
   var oscillator = context.createOscillator();
 
   var isPlaying = false;
@@ -13,7 +13,7 @@ function Sound() {
 
   oscillator.type = 2; // sawtooth
   oscillator.frequency = 440;
-  oscillator.noteOn(0);
+  oscillator.start(0);
 
   this.isPlaying = function() {
     return isPlaying;
