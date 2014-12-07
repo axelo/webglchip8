@@ -27,7 +27,7 @@ Good Luck!
 
 Try it
 ------
-Recommended games for maximum experince is [ANT](http://axelo.github.com/webglchip8/index.html?rom=ANT), [CAR](http://axelo.github.com/webglchip8/index.html?rom=CAR), [BLINKY](http://axelo.github.com/webglchip8/index.html?rom=BLINKY), Have fun!
+Recommended games for maximum experince is [ANT](http://axelo.github.com/webglchip8/index.html?rom=ANT), [CAR](http://axelo.github.com/webglchip8/index.html?rom=CAR), [BLINKY](http://axelo.github.com/webglchip8/index.html?rom=BLINKY) and [CHIPPY](http://axelo.github.com/webglchip8/index.html?rom=CHIPPY), Have fun!
 
 
 ###Chip8 games
@@ -77,6 +77,8 @@ Recommended games for maximum experince is [ANT](http://axelo.github.com/webglch
 [ANT](http://axelo.github.com/webglchip8/index.html?rom=ANT)
 
 [CAR](http://axelo.github.com/webglchip8/index.html?rom=CAR)
+
+[CHIPPY](http://axelo.github.com/webglchip8/index.html?rom=CHIPPY)
 
 [JOUST23](http://axelo.github.com/webglchip8/index.html?rom=JOUST23)
 
