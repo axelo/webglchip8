@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style type="text/css">
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: black;
+      }
+
+      #canvas2d, #canvas3d {
+        background-color: black;
+        position: absolute;
+        top: 0; left: 0;
+      }
+
+    </style>
+
+    <script type="text/javascript" src="src/js/Keyboard.js"></script>
+    <script type="text/javascript" src="src/js/Video.js"></script>
+    <script type="text/javascript" src="src/js/Sound.js"></script>
+    <script type="text/javascript" src="src/js/VirtualMachine.js"></script>
+    <script type="text/javascript" src="src/js/Interpreter.js"></script>
+    
+    <script type="text/javascript" src="src/js/RomLoader.js"></script>
+
+    <script type="text/javascript" src="src/js/MouseCamareControl.js"></script>
+    <script type="text/javascript" src="src/js/ShadersLoader.js"></script>
+    <script type="text/javascript" src="src/js/Renderer3d.js"></script>
+
+    <script type="text/javascript" src="src/js/Renderer2d.js"></script>
+
+    <script type="text/javascript" src="src/js/State.js"></script>
+    <script type="text/javascript" src="src/js/ArraySerializer.js"></script>
+
+    <script type="text/javascript" src="lib/glMatrix-0.9.5.min.js"></script>
+    
+    <script type="text/javascript">
+
+      var vm;
+      var video;
+
+      var interpreter;
+
+      var renderer2d;
+      var renderer3d;
+
+      var mouseCam;
+
+      var romName = getParameterByName("rom");
+      var romLoader = new RomLoader();
+
+      var states;
+
+      var lastTime = 0;
+      var opcodesPerSecond = parseInt(getParameterByName("opcodesPerSecond"));
+
+      function init() {
+        initRenders();
+
+        loadFont("chip8.font", function(chip8font) {
+          loadFont("schip8.font", function(schip8font) {
+            vm = new VirtualMachine(chip8font, schip8font, new Sound(), new Video(), new Keyboard());
+            
+            states = new State(vm);
+
+            interpreter = new Interpreter(vm);
+
+            romLoader.load(romName, function(rom) {
+              var romMeta = romLoader.loadMeta(romName, function (err, romMeta) {
+                if (romMeta !== undefined) {
+                  vm.keyboard.setMappings(romMeta.keyboardMapping);
+                  if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
+
+                  if (romMeta.camera) mouseCam.setCamera(romMeta.camera);
+                }
+                else {
+                  if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
+                }
+
+                vm.reset();
+                vm.load(rom);
+
+                console.log(opcodesPerSecond);
+
+                tick();
+              });
+            },
+            function() {
+              alert("Couldn't load rom '" + romName + "'");
+            });
+          });
+        });
+      }
+
+      function initRenders() {
+        renderer2d = new Renderer2d(document.getElementById("canvas2d"));
+        renderer2d.scale(2);
+
+        renderer3d = new Renderer3d(document.getElementById("canvas3d"));
+        renderer3d.scale(20);
+
+        mouseCam = new MouseCamareControl(document.getElementById("canvas3d"));
+        
+        window.onresize = function(e) {
+          renderer3d.scale(20);
+        }
+      }
+
+      var nextFetchAndExecute = 0;
+
+      var consumeKeys = [];
+
+      function onKeyDownOnce(keyCode, what) {
+        if (vm.keyboard.isKeyDown(keyCode)) {
+          if (!consumeKeys[keyCode]) {
+            what();
+            consumeKeys[keyCode] = true;
+          }
+        } else consumeKeys[keyCode] = false;
+      }
+
+      function updateCamera() {
+        renderer3d.zoom(mouseCam.zoom());
+        renderer3d.pan(mouseCam.panLeft(), mouseCam.panTop());
+        renderer3d.pitch(mouseCam.pitch());
+        renderer3d.yaw(mouseCam.yaw());
+        renderer3d.roll(mouseCam.roll());
+        renderer3d.scalez(mouseCam.scalez());
+      }
+
+      function tick() {
+        requestAnimationFrame(tick);
+  
+        var timeNow = new Date().getTime();
+
+        onKeyDownOnce(27, function() {
+
+          console.log("zoom", mouseCam.zoom());
+          console.log("pan", mouseCam.panLeft() + "," + mouseCam.panTop());
+          console.log("pitch", mouseCam.pitch());
+          console.log("yaw", mouseCam.yaw());
+          console.log("roll", mouseCam.roll());
+          console.log("scalez", mouseCam.scalez());
+
+          vm.halted = !vm.halted;
+
+          if (vm.halted) {
+            vm.sound.forceMute();
+          }
+          else {
+            if (vm.sound.isForcedMute()) {
+              vm.sound.unmute();
+            }
+          }
+        });
+
+        onKeyDownOnce(188, function() {
+          states.save();
+        });
+
+        onKeyDownOnce(190, function() {
+          states.load();
+        });
+
+        if (lastTime !== 0) {
+          var elapsed = timeNow - lastTime; // in ms
+
+          if (!vm.halted) {
+            vm.updateDelayTimer(elapsed);
+            vm.updateSoundTimer(elapsed);
+
+            nextFetchAndExecute += opcodesPerSecond * elapsed / 1000.0; // opcodes/s
+
+            while (nextFetchAndExecute >= 1 && !vm.halted) {
+              interpreter.interpret(vm.fetch());
+              nextFetchAndExecute -= 1;
+            }
+          }
+
+          updateCamera();
+
+          renderer3d.render(vm.video);
+          renderer2d.render(vm.video);
+        }
+
+        lastTime = timeNow;
+      }
+
+      window.onload = function() {
+        init();
+      }
+
+      function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regexS = "[\\?&]" + name + "=([^&#]*)";
+        var regex = new RegExp(regexS);
+        var results = regex.exec(window.location.search);
+        if(results == null)
+          return "";
+        else
+          return decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+
+      function loadFont(font, cb) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("GET", "font/" + font, true);
+        xhr.responseType = "arraybuffer";
+
+        xhr.onerror = function(e) {
+          console.log("Rom font error");
+          cb([]);
+        }
+
+        xhr.onload = function(e) {
+          if (xhr.status === 200) {
+            console.log("Rom font loaded.");
+            cb(xhr.response);
+          }
+          else {
+            console.log("Rom font load error.");
+            cb([]);
+          }
+        }
+
+        xhr.send();
+      }
+
+    </script>
+
+  </head>
+  <body>
+
+    <div><canvas id="canvas3d" width="128" height="64"></canvas></div>
+    <div><canvas id="canvas2d" width="128" height="64"></canvas></div>
+
+  </body>
+</html>
