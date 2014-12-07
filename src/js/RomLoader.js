@@ -1,4 +1,4 @@
-function RomLoader() {
+  function RomLoader() {
   
   this.load = function(romName, cb, cberror) {
     var xhr = new XMLHttpRequest();
@@ -25,26 +25,23 @@ function RomLoader() {
     xhr.send();
   }
 
-  this.loadMeta = function(romName) {
+  this.loadMeta = function(romName, cb) {
     var xhr = new XMLHttpRequest();
 
-
-    xhr.open("GET", "chip8roms/" + romName + ".json", false); // TODO: async
+    xhr.open("GET", "chip8roms/" + romName + ".json", true);
     xhr.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2005 00:00:00 GMT");
     
     xhr.onerror = function(e) {
       console.log("Rom meta error", romName);
+      cb(e);
+    }
+
+    xhr.onload = function(e) {
+      console.log("Rom meta for '" + romName + "' loaded.");
+      cb(undefined, JSON.parse(xhr.responseText));
     }
 
     xhr.send();
-
-    if (xhr.status === 200) {
-      console.log("Rom meta for '" + romName + "' loaded.");
-      return JSON.parse(xhr.responseText);
-    }
-    else {
-      console.log("Rom meta load error", romName);
-    }
   }
 
 }

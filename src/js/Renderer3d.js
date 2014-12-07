@@ -1,4 +1,4 @@
-function Renderer3d(canvas) {
+function Renderer3d(canvas, cbLoaded) {
   
   var scale = 1;
 
@@ -150,8 +150,6 @@ function Renderer3d(canvas) {
 
   function init() {
     initGl();
-    initBuffers();
-    bindBuffers();
   }
 
   function initGl() {
@@ -168,6 +166,11 @@ function Renderer3d(canvas) {
       shaderLoader.load("src/shaders/shader.frag", function(fragmentShader) {
         
         initShaders(vertexShader, fragmentShader);
+
+        initBuffers();
+        bindBuffers();
+
+        if (cbLoaded) cbLoaded();
       });
     });
   }

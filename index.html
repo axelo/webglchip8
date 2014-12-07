@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-
+    <meta charset="utf-8">
     <style type="text/css">
 
       * {
@@ -72,24 +72,24 @@
             interpreter = new Interpreter(vm);
 
             romLoader.load(romName, function(rom) {
-              var romMeta = romLoader.loadMeta(romName);
+              var romMeta = romLoader.loadMeta(romName, function (err, romMeta) {
+                if (romMeta !== undefined) {
+                  vm.keyboard.setMappings(romMeta.keyboardMapping);
+                  if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
 
-              if (romMeta !== undefined) {
-                vm.keyboard.setMappings(romMeta.keyboardMapping);
-                if (isNaN(opcodesPerSecond)) opcodesPerSecond = parseInt(romMeta.opcodesPerSecond);
+                  if (romMeta.camera) mouseCam.setCamera(romMeta.camera);
+                }
+                else {
+                  if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
+                }
 
-                if (romMeta.camera) mouseCam.setCamera(romMeta.camera);
-              }
-              else {
-                if (isNaN(opcodesPerSecond)) opcodesPerSecond = 40;
-              }
+                vm.reset();
+                vm.load(rom);
 
-              vm.reset();
-              vm.load(rom);
+                console.log(opcodesPerSecond);
 
-              console.log(opcodesPerSecond);
-
-              tick();
+                tick();
+              });
             },
             function() {
               alert("Couldn't load rom '" + romName + "'");
@@ -135,7 +135,7 @@
       }
 
       function tick() {
-        webkitRequestAnimationFrame(tick);
+        requestAnimationFrame(tick);
   
         var timeNow = new Date().getTime();
 

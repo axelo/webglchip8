@@ -1,6 +1,6 @@
 function Sound() {
   
-  var context = new webkitAudioContext();
+  var context = new (AudioContext || webkitAudioContext)();
   var gainNode = context.createGain();
   var oscillator = context.createOscillator();
 

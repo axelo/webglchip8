@@ -3,7 +3,7 @@ function ShadersLoader(gl) {
   this.load = function(shader, cb) {    
     var xhr = new XMLHttpRequest();
 
-    xhr.open("GET", shader, false); // TODO: async this maddafacka
+    xhr.open("GET", shader, true); // TODO: async this maddafacka
     //xhr.responseType = "plain";
     
     xhr.onload = function(e) {
